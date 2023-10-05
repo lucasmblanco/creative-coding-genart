@@ -7,8 +7,10 @@ const settings = {
     dimensions: [2048, 2048]
 };
 
-function diffPoint(grid, [x, y]) {
-    const [x2, y2] = random.pick(grid);
+function diffPoint(grid, p) {
+    const [x, y] = p;
+    const { position } = random.pick(grid);
+    const [x2, y2] = position; 
     if (x2 !== x && y2 !== y && y2 !== 1 ) {
         return [x2, y2];
     } else {
@@ -28,15 +30,22 @@ const sketch = () => {
             for (let j = 0; j < count; j++){
                 const u = i / (count - 1);
                 const v = j / (count - 1);
-                points.push([u, v]);
+                points.push({
+                    color: random.pick(palette),
+                    rotation: random.noise2D(u,v),
+                    position: [u, v]
+                });
             }
         }
         return points;
     }
+
     const grid = createGrid();
     const margin = 50; 
+    const bg = random.pick(palette);
     return ({ context, width, height }) => {
-        context.fillStyle = 'white'; 
+        
+        context.fillStyle = bg; 
         context.fillRect(0, 0, width, height); 
         // grid.forEach(point => {
         //     const [u, v] = point;
@@ -49,20 +58,26 @@ const sketch = () => {
         //     context.fillStyle = 'red';
         //     context.fill();
         // })
-        grid.filter((point) => point[1] < 0.8).forEach(([x, y]) => {
-            const to = diffPoint(grid, [x, y]); 
+        grid.forEach((data) => {
+            const { rotation, position, color } = data;
+            console.log(position);
+            const [x, y] = position;
+            const to = diffPoint(grid, position); 
+            context.save();
             context.beginPath();
             context.moveTo(lerp(margin, width - margin, x), lerp(margin, height - margin, y));
             context.lineTo(lerp(margin, height - margin, to[0]), lerp(margin, height - margin, to[1]));
             context.lineTo(lerp(margin, height - margin, to[0]), lerp(margin, height - margin, 1));
             context.lineTo(lerp(margin, width - margin, x), lerp(margin, height - margin, 1));
             context.lineTo(lerp(margin, width - margin, x), lerp(margin, height - margin, y));
-            context.strokeStyle = 'white'
+            context.rotate(rotation);
+            context.strokeStyle = bg;
             context.lineWidth = 20;
             context.stroke();
-            context.fillStyle = random.pick(palette);
+            context.fillStyle = color;
             context.fill();
-            context.closePath()
+            context.closePath();
+            context.restore();
         })        
     }
 }
