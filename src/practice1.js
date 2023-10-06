@@ -14,7 +14,7 @@ function diffPoint(grid, p) {
     if (x2 !== x && y2 !== y && y2 !== 1 ) {
         return [x2, y2];
     } else {
-        return diffPoint(grid, [x, y]); 
+        return diffPoint(grid, p); 
     }
 }
 
